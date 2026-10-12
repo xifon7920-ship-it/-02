@@ -1,0 +1,137 @@
+-- =====================================================
+-- กุไอโฟน888 - ขโมยไข่ (Fixed Version for Delta)
+-- =====================================================
+
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- ลบเมนูเก่าทิ้งก่อน (ถ้ามีค้างอยู่)
+if playerGui:FindFirstChild("iPhone888Hub") then
+    playerGui.iPhone888Hub:Destroy()
+end
+
+-- สร้าง ScreenGui หลัก
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "iPhone888Hub"
+ScreenGui.Parent = playerGui
+ScreenGui.ResetOnSpawn = false
+
+-- สร้างกรอบเมนูหลัก
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.Position = UDim2.new(0.1, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 240, 0, 220)
+MainFrame.Active = true
+MainFrame.Draggable = true -- ลากเลื่อนหน้าจอได้
+
+-- หัวข้อหน้าต่าง
+local Title = Instance.new("TextLabel")
+Title.Parent = MainFrame
+Title.BackgroundColor3 = Color3.fromRGB(0, 110, 255)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Font = Enum.Font.SourceSansBold
+Title.Text = "📱 กุไอโฟน888"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 18
+
+-- จัดเรียงปุ่มอัตโนมัติ
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = MainFrame
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 8)
+
+-- ฟังก์ชันสร้างปุ่มกดใช้งาน
+local function createButton(name, callback)
+    local btn = Instance.new("TextButton")
+    btn.Parent = MainFrame
+    btn.Size = UDim2.new(1, -10, 0, 45)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 16
+    btn.Text = name .. " : [ปิด]"
+    
+    local state = false
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        if state then
+            btn.Text = name .. " : [เปิด]"
+            btn.BackgroundColor3 = Color3.fromRGB(0, 160, 0)
+        else
+            btn.Text = name .. " : [ปิด]"
+            btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        end
+        callback(state)
+    end)
+end
+
+--------------------------------------------------------
+-- 1. สคริปต์วิ่งเร็ว (ปลอดภัย ไม่แลก)
+--------------------------------------------------------
+_G.FastRun = false
+createButton("⚡ วิ่งเร็ว (Safe Speed)", function(state)
+    _G.FastRun = state
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.3)
+        pcall(function()
+            if _G.FastRun then
+                local char = player.Character
+                if char and char:FindFirstChild("Humanoid") then
+                    char.Humanoid.WalkSpeed = 35
+                end
+            else
+                local char = player.Character
+                if char and char:FindFirstChild("Humanoid") then
+                    char.Humanoid.WalkSpeed = 16
+                end
+            end
+        end)
+    end
+end)
+
+--------------------------------------------------------
+-- 2. สคริปต์ช่วยวาร์ปหาไข่แรร์ในแมพ
+--------------------------------------------------------
+_G.AutoGetEgg = false
+createButton("🥚 วาร์ปเก็บไข่แรร์", function(state)
+    _G.AutoGetEgg = state
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(1.5)
+        pcall(function()
+            if _G.AutoGetEgg then
+                local char = player.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    for _, obj in pairs(workspace:GetDescendants()) do
+                        if _G.AutoGetEgg and obj:IsA("Model") then
+                            local name = string.lower(obj.Name)
+                            if string.find(name, "egg") or string.find(name, "trex") or string.find(name, "rare") then
+                                local targetPart = obj:FindFirstChild("PrimaryPart") or obj:FindFirstChildWhichIsA("BasePart")
+                                if targetPart then
+                                    hrp.CFrame = targetPart.CFrame + Vector3.new(0, 3, 0)
+                                    task.wait(0.8)
+                                    break
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+--------------------------------------------------------
+-- 3. ระบบกันหลุด (Anti-AFK)
+--------------------------------------------------------
+pcall(function()
+    local vu = game:GetService("VirtualUser")
+    player.Idled
